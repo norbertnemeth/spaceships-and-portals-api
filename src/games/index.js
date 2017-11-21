@@ -25,17 +25,22 @@ class Games {
   }
 
   generateBattleField(id) {
-    const game = this.data[id];
-    console.log(game);
+    const table = this.fillEmpty(this.fillRocket(this.fillTeleport(new Array(36))));
+    this.data[id].table = table;
+    console.log(this.data[id]);
   }
 
-  fillRocket(table, rocketNumber) {
+  fillRocket(table, rocketNumber = 6) {
     const tableSize = table.length;
-    for (let i = 0; i < rocketNumber; i++) {
+    for (let i = 1; i < rocketNumber; i++) {
       while (true) {
         const rocketPostion = Math.floor((Math.random() * tableSize));
         if (!table[rocketPostion]) {
-          table[rocketPostion] = { type: 'ROCKET', id: `${rocketPostion}_ROCKET` };
+          table[rocketPostion] = {
+            type: 'ROCKET',
+            id: `${rocketPostion}_ROCKET`,
+            players: []
+          };
           break;
         }
       }
@@ -43,9 +48,9 @@ class Games {
     return table;
   }
 
-  fillTeleport(table, teleportNumber) {
+  fillTeleport(table, teleportNumber = 6) {
     const tableSize = table.length;
-    for (let i = 0; i < teleportNumber; i++) {
+    for (let i = 1; i < teleportNumber; i++) {
       const teleportPostion = {};
 
       while (true) {
@@ -66,14 +71,26 @@ class Games {
       table[teleportPostion.first] = {
         type: "TELEPORT",
         twinsPosition: teleportPostion.second,
-        id: `${teleportPostion.first}_${teleportPostion.second}_TELEPORT`
+        id: `${teleportPostion.first}_${teleportPostion.second}_TELEPORT`,
+        players: []
       };
       table[teleportPostion.second] = {
         type: "TELEPORT",
         twinsPosition: teleportPostion.first,
-        id: `${teleportPostion.first}_${teleportPostion.second}_TELEPORT`
+        id: `${teleportPostion.first}_${teleportPostion.second}_TELEPORT`,
+        players: []
       };
     }
+    return table;
+  }
+
+  fillEmpty(table) {
+    table[0] = { players: ['username?', 'object?'] };
+    for (let i = 1; i < table.length; i++) {
+      const item = table[i];
+      table[i] = item ? item : { players: [] };
+    }
+    return table;
   }
 }
 
