@@ -3,6 +3,8 @@ class User {
     this.socket = socket;
     this.socketId = socket.id;
     this.username = msg.username;
+    this.position = 0;
+    this.character = "";
   }
 
 }
