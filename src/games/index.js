@@ -31,20 +31,21 @@ class Games {
 
   generateBattleField(id) {
     this.data[id].tableSize = { row: 6, column: 8, total: 48 };
-    const table = this.fillEmpty(this.fillRocket(this.fillTeleport(new Array(this.data[id].tableSize.total))));
+    const table = this.fillEmpty(this.fillSpaceship(this.fillPortals(new Array(this.data[id].tableSize.total))));
     this.data[id].table = table;
     main.io.to(id).emit('table-generate-success', { table: this.data[id].table, tableSize: this.data[id].tableSize });
   }
 
-  fillRocket(table, rocketNumber = 3) {
+  fillSpaceship(table, spaceship = 3) {
     const tableSize = table.length;
-    for (let i = 1; i < rocketNumber; i++) {
+    for (let i = 0; i < spaceship; i++) {
       while (true) {
-        const rocketPostion = Math.floor(Math.random() * tableSize);
-        if (!table[rocketPostion]) {
-          table[rocketPostion] = {
-            type: 'ROCKET',
-            id: `${rocketPostion}_ROCKET`
+        const spaceshipPostion = Math.floor(Math.random() * tableSize);
+        if (!table[spaceshipPostion] && spaceshipPostion > 0 && spaceshipPostion + 3 < tableSize) {
+          table[spaceshipPostion] = {
+            type: 'spaceship',
+            id: `${spaceshipPostion}_spaceship`,
+            value: `spaceship${i + 1}`
           };
           break;
         }
@@ -53,35 +54,37 @@ class Games {
     return table;
   }
 
-  fillTeleport(table, teleportNumber = 4) {
+  fillPortals(table, portalNumber = 5) {
     const tableSize = table.length;
-    for (let i = 1; i < teleportNumber; i++) {
-      const teleportPostion = {};
+    for (let i = 0; i < portalNumber; i++) {
+      const portalPostion = {};
 
       while (true) {
         const pos = Math.floor((Math.random() * tableSize));
-        if (!table[pos]) {
-          teleportPostion.first = pos;
+        if (!table[pos] && pos > 0 && pos + 3 < tableSize) {
+          portalPostion.first = pos;
           break;
         }
       }
 
       while (true) {
         const pos = Math.floor((Math.random() * tableSize));
-        if (!table[pos] && pos !== teleportPostion.first) {
-          teleportPostion.second = pos;
+        if (!table[pos] && pos !== portalPostion.first && pos > 0 && pos + 3 < tableSize) {
+          portalPostion.second = pos;
           break;
         }
       }
-      table[teleportPostion.first] = {
-        type: "TELEPORT",
-        twinsPosition: teleportPostion.second,
-        id: `${teleportPostion.first}_${teleportPostion.second}_TELEPORT`
+      table[portalPostion.first] = {
+        type: "portal",
+        twinsPosition: portalPostion.second,
+        id: `${portalPostion.first}_${portalPostion.second}_portal`,
+        value: `portal${i + 1}`
       };
-      table[teleportPostion.second] = {
-        type: "TELEPORT",
-        twinsPosition: teleportPostion.first,
-        id: `${teleportPostion.first}_${teleportPostion.second}_TELEPORT`
+      table[portalPostion.second] = {
+        type: "portal",
+        twinsPosition: portalPostion.first,
+        id: `${portalPostion.first}_${portalPostion.second}_portal`,
+        value: `portal${i + 1}`
       };
     }
     return table;
