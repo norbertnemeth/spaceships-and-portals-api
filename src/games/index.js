@@ -20,12 +20,15 @@ class Games {
     }
     const id = uuid();
     const game = { users: [], nextPlayer: this.waitingPlayer.socketId, id };
-    game.users.push({ ...this.waitingPlayer, character: characters[0] }, { ...user, character: characters[1] });
-    game.users.forEach(user => user.socket.join(id));
+    game.users.push(this.waitingPlayer, user);
+    game.users.forEach((user, idx) => {
+      user.socket.join(id);
+      user.setCharacter(characters[idx]);
+    });
     this.data[id] = game;
     this.waitingPlayer = null;
     console.log('Game has begun!');
-    main.io.to(id).emit('game-started', id);
+    game.users.forEach(user => user.socket.emit('game-started', { gameId: id, ownId: user.socketId }));
     return id;
   }
 
@@ -33,7 +36,12 @@ class Games {
     this.data[id].tableSize = { row: 6, column: 8, total: 48 };
     const table = this.fillEmpty(this.fillSpaceship(this.fillPortals(new Array(this.data[id].tableSize.total))));
     this.data[id].table = table;
-    main.io.to(id).emit('table-generate-success', { table: this.data[id].table, tableSize: this.data[id].tableSize });
+    main.io.to(id).emit('table-generate-success', {
+      table: this.data[id].table,
+      tableSize: this.data[id].tableSize,
+      playerPositionsWithData: this.data[id].users.map(user => user.getCharacterAndPosition()),
+      youTurn: this.data[id].users[Math.floor(Math.random() * 2)].socketId
+    });
   }
 
   fillSpaceship(table, spaceship = 3) {
@@ -91,8 +99,7 @@ class Games {
   }
 
   fillEmpty(table) {
-    table[0] = { characters, index: 0 };
-    for (let index = 1; index < table.length; index++) {
+    for (let index = 0; index < table.length; index++) {
       const item = table[index];
       table[index] = item ? Object.assign(item, { index }) : { index };
     }
