@@ -134,7 +134,7 @@ module.exports = {
       'consistent-return': 0,
       'consistent-this': [0, 'self'],
       'constructor-super': 1,
-      'curly': [1, 'all'],
+      'curly': [0, 'multi'],
       'default-case': 0,
       'dot-location': [1, 'property'],
       'dot-notation': [0, { allowKeywords: true }],

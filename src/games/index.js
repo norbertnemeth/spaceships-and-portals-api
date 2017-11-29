@@ -1,5 +1,3 @@
-import { type } from 'os';
-
 const uuid = require('uuid/v4');
 const main = require('../../lib');
 
@@ -22,7 +20,7 @@ class Games {
       return null;
     }
     const id = uuid();
-    const game = { users: [], nextPlayer: this.waitingPlayer.socketId, id };
+    const game = { users: [], id };
     game.users.push(this.waitingPlayer, user);
     game.users.forEach((user, idx) => {
       user.socket.join(id);
@@ -111,23 +109,32 @@ class Games {
   }
 
   dice(gameId, socketId) {
-    const game = this.data[gameId];
-    if (!game && game.turn !== socketId) return;
-    const player = game.users.filter(user => users.socketId = socketId);
+    if (!this.data[gameId] || this.data[gameId].turn !== socketId) return;
+    const playerIdx = this.data[gameId].users.findIndex(user => user.socketId === socketId);
     const rollResult = Math.floor(Math.random() * 6) + 1;
-    const newPos = calcPos(player.position + rollResult, game.table);
+    const newPos = this.calcPos(this.data[gameId].users[playerIdx].position + rollResult, this.data[gameId].table);
+    this.data[gameId].users[playerIdx].position = newPos;
+    const nextPlayerId = this.data[gameId].users.findIndex(user => user.socketId !== socketId);
+    this.data[gameId].turn = this.data[gameId].users[nextPlayerId].socketId;
+    main.io.to(gameId).emit('dice-result', {
+      playerPositionsWithData: this.data[gameId].users.map(user => user.getCharacterAndPosition()),
+      youTurn: this.data[gameId].users[nextPlayerId].socketId
+    });
   }
 
   calcPos(position, table) {
     const field = table[position];
+    if (!field) return table.length - 1;
     if (!field.type) return position;
     if (field.type === 'portal') return field.twinsPosition;
-    if (field.type === 'spaceship') return calcPos(calcSpaceshipFlyingDist(), table)
+    if (field.type === 'spaceship') return this.calcPos(this.calcSpaceshipFlyingDist(position), table);
   }
 
-  calcSpaceshipFlyingDist() {
+  calcSpaceshipFlyingDist(position) {
     const dist = Math.floor(Math.random() * spaceshipRange * 2 + 1) - spaceshipRange;
-    return dist !== 0 ? dist : calcSpaceshipFlyingDist();
+    if (dist === 0) this.calcSpaceshipFlyingDist();
+    const newPos = position + dist;
+    return newPos < 0 ? 0 : newPos;
   }
 }
 
