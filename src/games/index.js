@@ -1,7 +1,10 @@
+import { type } from 'os';
+
 const uuid = require('uuid/v4');
 const main = require('../../lib');
 
 const characters = ['player1', 'player2'];
+const spaceshipRange = 4;
 
 class Games {
   constructor() {
@@ -36,11 +39,12 @@ class Games {
     this.data[id].tableSize = { row: 6, column: 8, total: 48 };
     const table = this.fillEmpty(this.fillSpaceship(this.fillPortals(new Array(this.data[id].tableSize.total))));
     this.data[id].table = table;
+    this.data[id].turn = this.data[id].users[Math.floor(Math.random() * 2)].socketId;
     main.io.to(id).emit('table-generate-success', {
       table: this.data[id].table,
       tableSize: this.data[id].tableSize,
       playerPositionsWithData: this.data[id].users.map(user => user.getCharacterAndPosition()),
-      youTurn: this.data[id].users[Math.floor(Math.random() * 2)].socketId
+      youTurn: this.data[id].turn
     });
   }
 
@@ -104,6 +108,26 @@ class Games {
       table[index] = item ? Object.assign(item, { index }) : { index };
     }
     return table;
+  }
+
+  dice(gameId, socketId) {
+    const game = this.data[gameId];
+    if (!game && game.turn !== socketId) return;
+    const player = game.users.filter(user => users.socketId = socketId);
+    const rollResult = Math.floor(Math.random() * 6) + 1;
+    const newPos = calcPos(player.position + rollResult, game.table);
+  }
+
+  calcPos(position, table) {
+    const field = table[position];
+    if (!field.type) return position;
+    if (field.type === 'portal') return field.twinsPosition;
+    if (field.type === 'spaceship') return calcPos(calcSpaceshipFlyingDist(), table)
+  }
+
+  calcSpaceshipFlyingDist() {
+    const dist = Math.floor(Math.random() * spaceshipRange * 2 + 1) - spaceshipRange;
+    return dist !== 0 ? dist : calcSpaceshipFlyingDist();
   }
 }
 
