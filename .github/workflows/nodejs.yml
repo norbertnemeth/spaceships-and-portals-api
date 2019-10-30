@@ -17,6 +17,6 @@ jobs:
         env:
           TEST: ${{ secrets.TEST }}
       - name: test secret envionment via node
-        run: node -e "console.log(process.env)"
+        run: node -e "const asd = process.env.TEST; console.log(asd)"
         env:
           TEST: ${{ secrets.TEST }}
