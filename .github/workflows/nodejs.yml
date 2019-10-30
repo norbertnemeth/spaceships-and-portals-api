@@ -17,6 +17,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}
       - name: test secret envionment via node
-        run: node ./printenv.js
+        run: node -e "console.log(process.env)"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}
