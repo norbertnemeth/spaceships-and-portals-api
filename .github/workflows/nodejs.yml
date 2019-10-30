@@ -13,10 +13,10 @@ jobs:
         with:
           node-version: 10.x 
       - name: test secret envionment
-        run: echo $AWS_ACCESS_KEY_ID
+        run: echo $TEST
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}
+          TEST: ${{ secrets.TEST }}
       - name: test secret envionment via node
         run: node -e "console.log(process.env)"
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}
+          TEST: ${{ secrets.TEST }}
