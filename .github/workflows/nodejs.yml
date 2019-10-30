@@ -1,0 +1,14 @@
+name: Node CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: test secret envionment
+      run: echo $AWS_ACCESS_KEY_ID
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}
