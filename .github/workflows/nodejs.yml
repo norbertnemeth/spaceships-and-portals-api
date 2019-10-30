@@ -8,7 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: test secret envionment
-      run: echo $AWS_ACCESS_KEY_ID
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}
+      - name: Set Node.js 10.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x 
+      - name: test secret envionment
+        run: echo $AWS_ACCESS_KEY_ID
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}
+      - name: test secret envionment via node
+        run: node ./printenv.js
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TEST }}:  
